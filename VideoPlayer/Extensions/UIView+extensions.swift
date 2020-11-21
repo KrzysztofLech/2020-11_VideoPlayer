@@ -58,4 +58,20 @@ extension UIView {
         widthAnchor.constraint(equalToConstant: size.width).isActive = true
         heightAnchor.constraint(equalToConstant: size.height).isActive = true
     }
+    
+    func placeAtSuperviewBottom() {
+        translatesAutoresizingMaskIntoConstraints = false
+        
+        if let superviewBottomAnchor = superview?.safeAreaLayoutGuide.bottomAnchor {
+            bottomAnchor.constraint(equalTo: superviewBottomAnchor).isActive = true
+        }
+        
+        if let superviewLeadingAnchor = superview?.leadingAnchor {
+            leadingAnchor.constraint(equalTo: superviewLeadingAnchor, constant: 0).isActive = true
+        }
+        
+        if let superviewTrailingAnchor = superview?.trailingAnchor {
+            trailingAnchor.constraint(equalTo: superviewTrailingAnchor, constant: 0).isActive = true
+        }
+    }
 }

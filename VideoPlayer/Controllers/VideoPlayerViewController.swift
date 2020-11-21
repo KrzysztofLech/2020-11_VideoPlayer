@@ -16,6 +16,13 @@ final class VideoPlayerViewController: UIViewController {
     private let player: AVPlayer
     private let playerLayer: AVPlayerLayer
     
+    private var duration: CMTime {
+        return player.currentItem?.duration ?? .zero
+    }
+    private var durationInSeconds: Double {
+        return CMTimeGetSeconds(duration)
+    }
+    
     // MARK: - View objects -
     
     private lazy var controlItemsView: VideoControlItemsView = {
@@ -48,6 +55,7 @@ final class VideoPlayerViewController: UIViewController {
         addControlItemsView()
         setupVideoPlayer()
         addTapGestureRecognizer()
+        setupProgressObserver()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -90,6 +98,19 @@ final class VideoPlayerViewController: UIViewController {
     
     @objc private func didTapOnView() {
         controlItemsView.manageVisibility()
+    }
+    
+    private func setupProgressObserver() {
+        let interval = CMTimeMakeWithSeconds(0.01, preferredTimescale: 100)
+        player.addPeriodicTimeObserver(forInterval: interval,
+                                       queue: .main) { [weak self] time in
+            
+            let currentTimeInSeconds = CMTimeGetSeconds(time)
+            guard currentTimeInSeconds >= 0, let duration = self?.durationInSeconds, duration > 0 else { return }
+            
+            let value = currentTimeInSeconds / duration
+            self?.controlItemsView.setProgress(Float(value))
+        }
     }
 }
 

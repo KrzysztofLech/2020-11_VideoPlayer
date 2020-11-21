@@ -71,6 +71,12 @@ final class VideoControlItemsView: UIView {
         }
     }()
     
+    private let progressBar: UIProgressView = {
+        let view = UIProgressView(progressViewStyle: .bar)
+        view.tintColor = .blue
+        return view
+    }()
+    
     // MARK: - Lifecycle -
     init(delegate: VideoControlItemsViewDelegate) {
         self.delegate = delegate
@@ -93,13 +99,14 @@ final class VideoControlItemsView: UIView {
         alpha = 0
         playButton.alpha = 0
         
-        [dimView, closeButton, playButton, pauseButton]
+        [dimView, closeButton, playButton, pauseButton, progressBar]
             .forEach { addSubview($0) }
         
         dimView.fillSuperview()
         closeButton.placeAtTopLeftSuperviewCorner(withSize: Constants.closeButtonSize)
         playButton.centerInSuperView(withSize: Constants.controlItemSize)
         pauseButton.centerInSuperView(withSize: Constants.controlItemSize)
+        progressBar.placeAtSuperviewBottom()
     }
 
     private func hideContent(hide: Bool, withDelay delay: Double = 0) {
@@ -153,5 +160,9 @@ final class VideoControlItemsView: UIView {
     
     func manageVisibility() {
         hideContent(hide: isContentVisible)
+    }
+    
+    func setProgress(_ value: Float) {
+        progressBar.setProgress(value, animated: false)
     }
 }
