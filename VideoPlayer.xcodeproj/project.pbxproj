@@ -64,6 +64,13 @@
 			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		6B14E0D725692F9800A55991 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		6B4B4E172568F3E800CAC024 = {
 			isa = PBXGroup;
 			children = (
@@ -86,6 +93,7 @@
 				6B4B4E232568F3E800CAC024 /* AppDelegate.swift */,
 				6B14E0B625691BA000A55991 /* Coordinators */,
 				6B14E0B425691B7100A55991 /* Controllers */,
+				6B14E0D725692F9800A55991 /* Extensions */,
 				6B14E0C22569204600A55991 /* Supporting Files */,
 			);
 			path = VideoPlayer;

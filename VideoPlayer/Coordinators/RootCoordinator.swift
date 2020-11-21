@@ -14,6 +14,7 @@ protocol Coordinator {
 
 protocol RootCoordinatorDelegate: AnyObject {
     func didTapOnPlayButton()
+    func didTapOnCloseButton()
 }
 
 final class RootCoordinator: Coordinator {
@@ -52,6 +53,12 @@ final class RootCoordinator: Coordinator {
             self?.videoPlayerViewController = videoPlayerViewController
         })
     }
+    
+    private func hideVideoPlayer() {
+        videoPlayerViewController?.dismiss(animated: true, completion: { [weak self] in
+            self?.videoPlayerViewController = nil
+        })
+    }
 }
 
 // MARK: - RootCoordinatorDelegate methods -
@@ -59,5 +66,9 @@ final class RootCoordinator: Coordinator {
 extension RootCoordinator: RootCoordinatorDelegate {
     func didTapOnPlayButton() {
         showVideoPlayer()
+    }
+    
+    func didTapOnCloseButton() {
+        hideVideoPlayer()
     }
 }
