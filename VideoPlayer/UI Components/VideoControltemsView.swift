@@ -72,10 +72,8 @@ final class VideoControlItemsView: UIView {
         }
     }()
     
-    private let progressBar: UIProgressView = {
-        let view = UIProgressView(progressViewStyle: .bar)
-        view.tintColor = .blue
-        return view
+    private let progressBar: ProgressBar = {
+        return ProgressBar()
     }()
     
     // MARK: - Lifecycle -
@@ -173,7 +171,8 @@ final class VideoControlItemsView: UIView {
         delegate?.hideStatusBar(isContentVisible)
     }
     
-    func setProgress(_ value: Float) {
+    func setProgress(_ value: Float, time: String) {
         progressBar.setProgress(value, animated: false)
+        progressBar.time = time
     }
 }

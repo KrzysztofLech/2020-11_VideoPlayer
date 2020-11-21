@@ -15,14 +15,8 @@ final class VideoPlayerViewController: UIViewController {
     
     private let player: AVPlayer
     private let playerLayer: AVPlayerLayer
+    private let viewModel: VideoPlayerViewModel
     
-    private var duration: CMTime {
-        return player.currentItem?.duration ?? .zero
-    }
-    private var durationInSeconds: Double {
-        return CMTimeGetSeconds(duration)
-    }
-
     private var isStatusBarHidden: Bool = true {
         didSet {
             UIView.animate(withDuration: 0.3) {
@@ -44,6 +38,7 @@ final class VideoPlayerViewController: UIViewController {
     init(videoUrl: URL, delegate: RootCoordinatorDelegate) {
         self.player = AVPlayer(url: videoUrl)
         self.playerLayer = AVPlayerLayer(player: player)
+        self.viewModel = VideoPlayerViewModel(playerItem: player.currentItem)
 
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
@@ -110,15 +105,13 @@ final class VideoPlayerViewController: UIViewController {
     }
     
     private func setupProgressObserver() {
-        let interval = CMTimeMakeWithSeconds(0.01, preferredTimescale: 100)
+        let interval = CMTimeMakeWithSeconds(1, preferredTimescale: 1)
         player.addPeriodicTimeObserver(forInterval: interval,
                                        queue: .main) { [weak self] time in
             
-            let currentTimeInSeconds = CMTimeGetSeconds(time)
-            guard currentTimeInSeconds >= 0, let duration = self?.durationInSeconds, duration > 0 else { return }
-            
-            let value = currentTimeInSeconds / duration
-            self?.controlItemsView.setProgress(Float(value))
+            guard let progressData = self?.viewModel.getProgressData(atTime: time) else { return }
+            self?.controlItemsView.setProgress(progressData.value,
+                                               time: progressData.time)
         }
     }
 }
