@@ -21,7 +21,8 @@ final class RootCoordinator: Coordinator {
     // MARK: - Properties -
     
     private var window: UIWindow?
-    private var navigationController: MainNavigationController?
+    private var mainViewController: MainViewController?
+    private var videoPlayerViewController: VideoPlayerViewController?
     
     // MARK: - Init -
     
@@ -35,12 +36,21 @@ final class RootCoordinator: Coordinator {
     
     private func showMainScreen() {
         let mainViewController = MainViewController(delegate: self)
-        let navigationController = MainNavigationController(rootViewController: mainViewController)
-        self.navigationController = navigationController
+        self.mainViewController = mainViewController
         
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = navigationController
+        window?.rootViewController = mainViewController
         window?.makeKeyAndVisible()
+    }
+    
+    private func showVideoPlayer() {
+        let videoPlayerViewController = VideoPlayerViewController(delegate: self)
+        videoPlayerViewController.modalTransitionStyle = .crossDissolve
+        videoPlayerViewController.modalPresentationStyle = .fullScreen
+        
+        mainViewController?.present(videoPlayerViewController, animated: true, completion: { [weak self] in
+            self?.videoPlayerViewController = videoPlayerViewController
+        })
     }
 }
 
@@ -48,6 +58,6 @@ final class RootCoordinator: Coordinator {
 
 extension RootCoordinator: RootCoordinatorDelegate {
     func didTapOnPlayButton() {
-        print("didTapOnPlayButton")
+        showVideoPlayer()
     }
 }

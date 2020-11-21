@@ -47,7 +47,7 @@ final class MainViewController: UIViewController {
     // MARK: - Setup methods -
     
     private func setupView() {
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 200/255, green: 73/255, blue: 72/255, alpha: 1)
         
         view.addSubview(playButton)
         NSLayoutConstraint.activate([
