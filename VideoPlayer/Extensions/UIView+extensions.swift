@@ -28,4 +28,34 @@ extension UIView {
             trailingAnchor.constraint(equalTo: superviewTrailingAnchor, constant: -padding.right).isActive = true
         }
     }
+    
+    func placeAtTopLeftSuperviewCorner(withSize size: CGSize) {
+        translatesAutoresizingMaskIntoConstraints = false
+        
+        if let superviewTopAnchor = superview?.safeAreaLayoutGuide.topAnchor {
+            topAnchor.constraint(equalTo: superviewTopAnchor).isActive = true
+        }
+        
+        if let superviewLeadingAnchor = superview?.leadingAnchor {
+            leadingAnchor.constraint(equalTo: superviewLeadingAnchor).isActive = true
+        }
+
+        widthAnchor.constraint(equalToConstant: size.width).isActive = true
+        heightAnchor.constraint(equalToConstant: size.height).isActive = true
+    }
+    
+    func centerInSuperView(withSize size: CGSize) {
+        translatesAutoresizingMaskIntoConstraints = false
+        
+        if let superviewCenterXAnchor = superview?.centerXAnchor {
+            centerXAnchor.constraint(equalTo: superviewCenterXAnchor).isActive = true
+        }
+        
+        if let superviewCenterYAnchor = superview?.centerYAnchor {
+            centerYAnchor.constraint(equalTo: superviewCenterYAnchor).isActive = true
+        }
+
+        widthAnchor.constraint(equalToConstant: size.width).isActive = true
+        heightAnchor.constraint(equalToConstant: size.height).isActive = true
+    }
 }

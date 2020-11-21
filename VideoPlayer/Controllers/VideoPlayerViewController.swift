@@ -84,7 +84,15 @@ final class VideoPlayerViewController: UIViewController {
 }
 
 extension VideoPlayerViewController: VideoControlItemsViewDelegate {
-    func didTapOnCloseButton() {
-        delegate?.didTapOnCloseButton()
+    func didTapOnButton(_ type: ControlType) {
+        switch type {
+        case .close: delegate?.didTapOnCloseButton()
+            
+        case .play:
+            player.play()
+            
+        case .pause:
+            player.pause()
+        }
     }
 }
