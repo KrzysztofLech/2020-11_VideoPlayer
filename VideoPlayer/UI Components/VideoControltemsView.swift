@@ -29,13 +29,21 @@ protocol VideoControlItemsViewDelegate: AnyObject {
 final class VideoControlItemsView: UIView {
     
     private enum Constants {
+        static let dimDelay: Double = 0.5
+        
         static let closeButtonSize = CGSize(width: 50, height: 50)
         static let controlItemSize = CGSize(width: 60, height: 60)
     }
         
     private weak var delegate: VideoControlItemsViewDelegate?
     
-    private var isPlayerPaused = false
+    private var isContentVisible = false
+    
+    private var isPlayerPaused = false {
+        didSet { managePlayerState() }
+    }
+    
+    private var dispatchWorkItem: DispatchWorkItem?
     
     // MARK: - Control objects -
     
@@ -74,10 +82,16 @@ final class VideoControlItemsView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        print("Deinit VideoControlItemsViewDelegate")   /// WYKASOWAć !!!
+    }
+
+    
     // MARK: - Setup methods -
     
     private func setup() {
-        playButton.isHidden = !isPlayerPaused
+        alpha = 0
+        playButton.alpha = 0
         
         [dimView, closeButton, playButton, pauseButton]
             .forEach { addSubview($0) }
@@ -87,6 +101,37 @@ final class VideoControlItemsView: UIView {
         playButton.centerInSuperView(withSize: Constants.controlItemSize)
         pauseButton.centerInSuperView(withSize: Constants.controlItemSize)
     }
+
+    private func hideContent(hide: Bool, withDelay delay: Double = 0) {
+        dispatchWorkItem?.cancel()
+        dispatchWorkItem = DispatchWorkItem { [weak self] in
+            self?.isContentVisible = !hide
+                        
+            UIView.animate(withDuration: 0.3, delay: delay, options: []) {
+                self?.alpha = hide ? 0 : 1
+            }
+        }
+        
+        if let dispatchWorkItem = dispatchWorkItem {
+            DispatchQueue.main.async(execute: dispatchWorkItem)
+        }
+    }
+    
+    private func managePlayerState() {
+        if isPlayerPaused {
+            UIView.animate(withDuration: 0.3)
+                { self.pauseButton.alpha = 0 }
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.3)
+                { self.playButton.alpha = 1 }
+        } else {
+            UIView.animate(withDuration: 0.3)
+                { self.playButton.alpha = 0 }
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.3)
+                { self.pauseButton.alpha = 1 }
+        }
+        
+        hideContent(hide: true, withDelay: Constants.dimDelay)
+    }
     
     // MARK: - Action methods -
     
@@ -95,10 +140,18 @@ final class VideoControlItemsView: UIView {
     }
     
     private func didTapOnPlayButton() {
+        isPlayerPaused = false
         delegate?.didTapOnButton(.play)
     }
 
     private func didTapOnPauseButton() {
+        isPlayerPaused = true
         delegate?.didTapOnButton(.pause)
+    }
+    
+    // MARK: - public methods -
+    
+    func manageVisibility() {
+        hideContent(hide: isContentVisible)
     }
 }

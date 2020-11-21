@@ -47,6 +47,7 @@ final class VideoPlayerViewController: UIViewController {
         setupView()
         addControlItemsView()
         setupVideoPlayer()
+        addTapGestureRecognizer()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -62,7 +63,7 @@ final class VideoPlayerViewController: UIViewController {
     }
     
     deinit {
-        print("Deinit VideoPlayerViewController")
+        print("Deinit VideoPlayerViewController")   /// WYKASOWAć !!!
     }
 
     // MARK: - Setup methods -
@@ -80,6 +81,15 @@ final class VideoPlayerViewController: UIViewController {
         playerLayer.frame = UIScreen.main.bounds
         playerLayer.videoGravity = .resizeAspect
         view.layer.insertSublayer(playerLayer, below: controlItemsView.layer)
+    }
+    
+    private func addTapGestureRecognizer() {
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnView))
+        view.addGestureRecognizer(recognizer)
+    }
+    
+    @objc private func didTapOnView() {
+        controlItemsView.manageVisibility()
     }
 }
 
