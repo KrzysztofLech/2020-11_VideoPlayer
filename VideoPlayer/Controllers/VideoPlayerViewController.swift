@@ -7,15 +7,18 @@
 //
 
 import UIKit
+import AVFoundation
 
 final class VideoPlayerViewController: UIViewController {
     
     private enum Constants {
         static let closeButtonSize = CGSize(width: 50, height: 50)
     }
-
     
     private weak var delegate: RootCoordinatorDelegate?
+    
+    private let player: AVPlayer
+    private let playerLayer: AVPlayerLayer
     
     // MARK: - View objects -
     
@@ -28,10 +31,12 @@ final class VideoPlayerViewController: UIViewController {
         return button
     }()
 
-    
     // MARK: - Lifecycle -
 
-    init(delegate: RootCoordinatorDelegate) {
+    init(videoUrl: URL, delegate: RootCoordinatorDelegate) {
+        self.player = AVPlayer(url: videoUrl)
+        self.playerLayer = AVPlayerLayer(player: player)
+
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
@@ -41,11 +46,25 @@ final class VideoPlayerViewController: UIViewController {
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
+    override var prefersHomeIndicatorAutoHidden: Bool { return true }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupView()
+        setupVideoPlayer()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        player.play()
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        playerLayer.frame = view.frame
     }
     
     deinit {
@@ -67,6 +86,12 @@ final class VideoPlayerViewController: UIViewController {
             closeButton.widthAnchor.constraint(equalToConstant: Constants.closeButtonSize.width),
             closeButton.heightAnchor.constraint(equalToConstant: Constants.closeButtonSize.height)
         ])
+    }
+    
+    private func setupVideoPlayer() {
+        playerLayer.frame = UIScreen.main.bounds
+        playerLayer.videoGravity = .resizeAspect
+        view.layer.insertSublayer(playerLayer, below: closeButton.layer)
     }
     
     // MARK: - Action methods -

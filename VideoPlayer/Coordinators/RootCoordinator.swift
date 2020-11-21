@@ -19,6 +19,10 @@ protocol RootCoordinatorDelegate: AnyObject {
 
 final class RootCoordinator: Coordinator {
     
+    private enum Constants {
+        static let testVideoUrl = "https://bit.ly/2ZKwDrA"
+    }
+    
     // MARK: - Properties -
     
     private var window: UIWindow?
@@ -45,7 +49,9 @@ final class RootCoordinator: Coordinator {
     }
     
     private func showVideoPlayer() {
-        let videoPlayerViewController = VideoPlayerViewController(delegate: self)
+        guard let url = URL(string: Constants.testVideoUrl) else { return }
+        
+        let videoPlayerViewController = VideoPlayerViewController(videoUrl: url, delegate: self)
         videoPlayerViewController.modalTransitionStyle = .crossDissolve
         videoPlayerViewController.modalPresentationStyle = .fullScreen
         
