@@ -24,6 +24,7 @@ enum ControlType {
 
 protocol VideoControlItemsViewDelegate: AnyObject {
     func didTapOnButton(_ type: ControlType)
+    func hideStatusBar(_ hide: Bool)
 }
 
 final class VideoControlItemsView: UIView {
@@ -113,7 +114,7 @@ final class VideoControlItemsView: UIView {
         dispatchWorkItem?.cancel()
         dispatchWorkItem = DispatchWorkItem { [weak self] in
             self?.isContentVisible = !hide
-                        
+            
             UIView.animate(withDuration: 0.3, delay: delay, options: []) {
                 self?.alpha = hide ? 0 : 1
             }
@@ -126,15 +127,24 @@ final class VideoControlItemsView: UIView {
     
     private func managePlayerState() {
         if isPlayerPaused {
-            UIView.animate(withDuration: 0.3)
-                { self.pauseButton.alpha = 0 }
-            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.3)
-                { self.playButton.alpha = 1 }
+            UIView.animate(withDuration: 0.3) {
+                self.pauseButton.alpha = 0
+            } completion: { _ in
+                self.delegate?.hideStatusBar(true)
+            }
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.1) {
+                self.playButton.alpha = 1
+            }
+            
         } else {
-            UIView.animate(withDuration: 0.3)
-                { self.playButton.alpha = 0 }
-            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.3)
-                { self.pauseButton.alpha = 1 }
+            UIView.animate(withDuration: 0.3) {
+                self.playButton.alpha = 0
+            } completion: { _ in
+                self.delegate?.hideStatusBar(true)
+            }
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.1) {
+                self.pauseButton.alpha = 1
+            }
         }
         
         hideContent(hide: true, withDelay: Constants.dimDelay)
@@ -160,6 +170,7 @@ final class VideoControlItemsView: UIView {
     
     func manageVisibility() {
         hideContent(hide: isContentVisible)
+        delegate?.hideStatusBar(isContentVisible)
     }
     
     func setProgress(_ value: Float) {

@@ -22,6 +22,14 @@ final class VideoPlayerViewController: UIViewController {
     private var durationInSeconds: Double {
         return CMTimeGetSeconds(duration)
     }
+
+    private var isStatusBarHidden: Bool = true {
+        didSet {
+            UIView.animate(withDuration: 0.3) {
+                self.setNeedsStatusBarAppearanceUpdate()
+            }
+        }
+    }
     
     // MARK: - View objects -
     
@@ -47,6 +55,7 @@ final class VideoPlayerViewController: UIViewController {
     
     override var preferredStatusBarStyle: UIStatusBarStyle { return .lightContent }
     override var prefersHomeIndicatorAutoHidden: Bool { return true }
+    override var prefersStatusBarHidden: Bool { return isStatusBarHidden }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -125,5 +134,9 @@ extension VideoPlayerViewController: VideoControlItemsViewDelegate {
         case .pause:
             player.pause()
         }
+    }
+    
+    func hideStatusBar(_ hide: Bool) {
+        isStatusBarHidden = hide
     }
 }
