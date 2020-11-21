@@ -11,10 +11,6 @@ import AVFoundation
 
 final class VideoPlayerViewController: UIViewController {
     
-    private enum Constants {
-        static let closeButtonSize = CGSize(width: 50, height: 50)
-    }
-    
     private weak var delegate: RootCoordinatorDelegate?
     
     private let player: AVPlayer
@@ -22,15 +18,12 @@ final class VideoPlayerViewController: UIViewController {
     
     // MARK: - View objects -
     
-    private let closeButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "close_icon"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .white
-        button.addTarget(self, action: #selector(didTapOnCloseButton), for: .touchUpInside)
-        return button
+    private lazy var controlItemsView: VideoControlItemsView = {
+        let view = VideoControlItemsView(delegate: self)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
-
+    
     // MARK: - Lifecycle -
 
     init(videoUrl: URL, delegate: RootCoordinatorDelegate) {
@@ -52,6 +45,7 @@ final class VideoPlayerViewController: UIViewController {
         super.viewDidLoad()
         
         setupView()
+        addControlItemsView()
         setupVideoPlayer()
     }
     
@@ -75,28 +69,22 @@ final class VideoPlayerViewController: UIViewController {
     
     private func setupView() {
         view.backgroundColor = .black
-        addCloseButton()
     }
     
-    private func addCloseButton() {
-        view.addSubview(closeButton)
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            closeButton.widthAnchor.constraint(equalToConstant: Constants.closeButtonSize.width),
-            closeButton.heightAnchor.constraint(equalToConstant: Constants.closeButtonSize.height)
-        ])
+    private func addControlItemsView() {
+        view.addSubview(controlItemsView)
+        controlItemsView.fillSuperview()
     }
-    
+        
     private func setupVideoPlayer() {
         playerLayer.frame = UIScreen.main.bounds
         playerLayer.videoGravity = .resizeAspect
-        view.layer.insertSublayer(playerLayer, below: closeButton.layer)
+        view.layer.insertSublayer(playerLayer, below: controlItemsView.layer)
     }
-    
-    // MARK: - Action methods -
-    
-    @objc private func didTapOnCloseButton() {
+}
+
+extension VideoPlayerViewController: VideoControlItemsViewDelegate {
+    func didTapOnCloseButton() {
         delegate?.didTapOnCloseButton()
     }
 }
