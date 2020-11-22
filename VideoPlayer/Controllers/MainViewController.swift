@@ -22,7 +22,7 @@ final class MainViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "play_icon"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.tintColor = .white
+        button.tintColor = UIColor(red: 215/255, green: 180/255, blue: 16/255, alpha: 1)
         button.addTarget(self, action: #selector(didTapOnPlayButton), for: .touchUpInside)
         return button
     }()
@@ -49,7 +49,7 @@ final class MainViewController: UIViewController {
     // MARK: - Setup methods -
     
     private func setupView() {
-        view.backgroundColor = UIColor(red: 200/255, green: 73/255, blue: 72/255, alpha: 1)
+        view.backgroundColor = UIColor(red: 0/255, green: 91/255, blue: 104/255, alpha: 1)
         
         view.addSubview(playButton)
         NSLayoutConstraint.activate([

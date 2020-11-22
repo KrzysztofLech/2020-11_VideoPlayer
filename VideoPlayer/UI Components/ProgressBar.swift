@@ -23,8 +23,8 @@ class ProgressBar: UIProgressView {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 10, weight: .medium)
-        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.textColor = UIColor(red: 125/255, green: 195/255, blue: 203/255, alpha: 1)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -35,7 +35,7 @@ class ProgressBar: UIProgressView {
     }
     
     private func setup() {
-        tintColor = .blue
+        tintColor = UIColor(red: 0/255, green: 91/255, blue: 104/255, alpha: 1)
         progressViewStyle = .bar
         
         addSubview(label)
