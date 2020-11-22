@@ -15,6 +15,7 @@ protocol Coordinator {
 protocol RootCoordinatorDelegate: AnyObject {
     func didTapOnPlayButton()
     func didTapOnCloseButton()
+    func saveCurrentPlayerTime(_ time: Double)
 }
 
 final class RootCoordinator: Coordinator {
@@ -25,13 +26,16 @@ final class RootCoordinator: Coordinator {
     
     // MARK: - Properties -
     
+    private var settingsService: SettingsServiceProtocol
     private var window: UIWindow?
     private var mainViewController: MainViewController?
     private var videoPlayerViewController: VideoPlayerViewController?
     
     // MARK: - Init -
     
-    init() {}
+    init() {
+        self.settingsService = SettingsService()
+    }
     
     func start() {
         showMainScreen()
@@ -49,14 +53,27 @@ final class RootCoordinator: Coordinator {
     }
     
     private func showVideoPlayer() {
+        let previousTime = settingsService.previousSessionVideoTime
+        if previousTime > 0 {
+            presentVideoController(previousSessionVideoTime: previousTime)
+        } else {
+            presentVideoController(previousSessionVideoTime: 0)
+        }
+    }
+    
+    private func presentVideoController(previousSessionVideoTime: Double) {
         guard let url = URL(string: Constants.testVideoUrl) else { return }
         
-        let videoPlayerViewController = VideoPlayerViewController(videoUrl: url, delegate: self)
+        let videoPlayerViewController = VideoPlayerViewController(
+            videoUrl: url,
+            previousSessionVideoTime: previousSessionVideoTime,
+            delegate: self)
         videoPlayerViewController.modalTransitionStyle = .crossDissolve
         videoPlayerViewController.modalPresentationStyle = .fullScreen
         
         mainViewController?.present(videoPlayerViewController, animated: true, completion: { [weak self] in
             self?.videoPlayerViewController = videoPlayerViewController
+            self?.removePreviousSessionVideoTime()
         })
     }
     
@@ -65,6 +82,11 @@ final class RootCoordinator: Coordinator {
             self?.videoPlayerViewController = nil
         })
     }
+    
+    private func removePreviousSessionVideoTime() {
+        settingsService.previousSessionVideoTime = 0
+    }
+    
 }
 
 // MARK: - RootCoordinatorDelegate methods -
@@ -76,5 +98,9 @@ extension RootCoordinator: RootCoordinatorDelegate {
     
     func didTapOnCloseButton() {
         hideVideoPlayer()
+    }
+    
+    func saveCurrentPlayerTime(_ time: Double) {
+        settingsService.previousSessionVideoTime = time
     }
 }

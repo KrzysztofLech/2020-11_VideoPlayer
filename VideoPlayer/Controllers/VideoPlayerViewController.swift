@@ -17,6 +17,7 @@ final class VideoPlayerViewController: UIViewController {
     
     private weak var delegate: RootCoordinatorDelegate?
     
+    private let previousSessionVideoTime: Double
     private let player: AVPlayer
     private let playerLayer: AVPlayerLayer
     private let viewModel: VideoPlayerViewModel
@@ -39,7 +40,8 @@ final class VideoPlayerViewController: UIViewController {
     
     // MARK: - Lifecycle -
 
-    init(videoUrl: URL, delegate: RootCoordinatorDelegate) {
+    init(videoUrl: URL, previousSessionVideoTime: Double, delegate: RootCoordinatorDelegate) {
+        self.previousSessionVideoTime = previousSessionVideoTime
         self.player = AVPlayer(url: videoUrl)
         self.playerLayer = AVPlayerLayer(player: player)
         self.viewModel = VideoPlayerViewModel(playerItem: player.currentItem)
@@ -65,11 +67,13 @@ final class VideoPlayerViewController: UIViewController {
         addTapGestureRecognizer()
         setupProgressObserver()
         addEndFileNotification()
+        addMoveToBackgroundNotification()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
+        moveVideoIfNeeded()
         player.play()
     }
     
@@ -109,25 +113,40 @@ final class VideoPlayerViewController: UIViewController {
         controlItemsView.manageVisibility()
     }
     
-    // MARK: - Player methods -
-    
-    private func setupProgressObserver() {
-        let interval = CMTimeMakeWithSeconds(1, preferredTimescale: 1)
-        player.addPeriodicTimeObserver(forInterval: interval,
-                                       queue: .main) { [weak self] time in
-            
-            guard let progressData = self?.viewModel.getProgressData(atTime: time) else { return }
-            self?.controlItemsView.setProgress(progressData.value,
-                                               time: progressData.time)
-        }
-    }
+    // MARK: - Notifications -
     
     private func addEndFileNotification() {
         NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime,
                                                object: player.currentItem,
                                                queue: nil) { [weak self] _ in
             self?.player.seek(to: .zero)
-            self?.controlItemsView.resetState()
+            self?.controlItemsView.setPause()
+        }
+    }
+    
+    private func addMoveToBackgroundNotification() {
+        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification,
+                                               object: nil,
+                                               queue: .main) { [weak self] _ in
+            guard let playerCurrentTime = self?.player.currentTime() else { return }
+        
+            self?.player.pause()
+            self?.controlItemsView.setPause()
+            let playerCurrentTimeInSeconds = CMTimeGetSeconds(playerCurrentTime)
+            self?.delegate?.saveCurrentPlayerTime(playerCurrentTimeInSeconds)
+        }
+    }
+        
+    // MARK: - Player methods -
+    
+    private func setupProgressObserver() {
+        let interval = CMTimeMakeWithSeconds(0.1, preferredTimescale: 10)
+        player.addPeriodicTimeObserver(forInterval: interval,
+                                       queue: .main) { [weak self] time in
+            
+            guard let progressData = self?.viewModel.getProgressData(atTime: time) else { return }
+            self?.controlItemsView.setProgress(progressData.value,
+                                               time: progressData.time)
         }
     }
     
@@ -141,12 +160,19 @@ final class VideoPlayerViewController: UIViewController {
         if newTime < 0 {
             player.seek(to: .zero)
             player.pause()
-            controlItemsView.resetState()
+            controlItemsView.setPause()
             
         } else if newTime < viewModel.durationInSeconds {
             let selectedTime = CMTime(seconds: newTime, preferredTimescale: 1000)
             player.seek(to: selectedTime, toleranceBefore: .zero, toleranceAfter: .zero)
         }
+    }
+    
+    private func moveVideoIfNeeded() {
+        guard previousSessionVideoTime > 0 else { return }
+        
+        let time = CMTime(seconds: previousSessionVideoTime, preferredTimescale: 1000)
+        player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 }
 
