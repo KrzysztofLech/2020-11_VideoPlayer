@@ -175,4 +175,8 @@ final class VideoControlItemsView: UIView {
         progressBar.setProgress(value, animated: false)
         progressBar.time = time
     }
+    
+    func resetState() {
+        isPlayerPaused = true
+    }
 }

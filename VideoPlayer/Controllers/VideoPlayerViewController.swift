@@ -60,6 +60,7 @@ final class VideoPlayerViewController: UIViewController {
         setupVideoPlayer()
         addTapGestureRecognizer()
         setupProgressObserver()
+        addEndFileNotification()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -112,6 +113,15 @@ final class VideoPlayerViewController: UIViewController {
             guard let progressData = self?.viewModel.getProgressData(atTime: time) else { return }
             self?.controlItemsView.setProgress(progressData.value,
                                                time: progressData.time)
+        }
+    }
+    
+    private func addEndFileNotification() {
+        NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime,
+                                               object: player.currentItem,
+                                               queue: nil) { [weak self] _ in
+            self?.player.seek(to: .zero)
+            self?.controlItemsView.resetState()
         }
     }
 }
