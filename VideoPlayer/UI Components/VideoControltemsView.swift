@@ -8,20 +8,6 @@
 
 import UIKit
 
-enum ControlType {
-    case close
-    case play
-    case pause
-    
-    var icon: UIImage? {
-        switch self {
-        case .close: return UIImage(named: "close_icon")
-        case .play: return UIImage(named: "play_icon")
-        case .pause: return UIImage(named: "pause_icon")
-        }
-    }
-}
-
 protocol VideoControlItemsViewDelegate: AnyObject {
     func didTapOnButton(_ type: ControlType)
     func hideStatusBar(_ hide: Bool)
@@ -31,6 +17,7 @@ final class VideoControlItemsView: UIView {
     
     private enum Constants {
         static let dimDelay: Double = 0.5
+        static let longDimDelay: Double = 1.5
         
         static let closeButtonSize = CGSize(width: 50, height: 50)
         static let controlItemSize = CGSize(width: 60, height: 60)
@@ -46,7 +33,7 @@ final class VideoControlItemsView: UIView {
     
     private var dispatchWorkItem: DispatchWorkItem?
     
-    // MARK: - Control objects -
+    // MARK: - UI control objects -
     
     private let dimView: UIView = {
         let view = UIView()
@@ -72,6 +59,18 @@ final class VideoControlItemsView: UIView {
         }
     }()
     
+    private lazy var backButton: UIButton = {
+        return VideoControlButton(type: .back) { [weak self] in
+            self?.didTapOnBackButton()
+        }
+    }()
+    
+    private lazy var forwardButton: UIButton = {
+        return VideoControlButton(type: .forward) { [weak self] in
+            self?.didTapOnForwardButton()
+        }
+    }()
+    
     private let progressBar: ProgressBar = {
         return ProgressBar()
     }()
@@ -91,20 +90,21 @@ final class VideoControlItemsView: UIView {
         print("Deinit VideoControlItemsViewDelegate")   /// WYKASOWAć !!!
     }
 
-    
     // MARK: - Setup methods -
     
     private func setup() {
         alpha = 0
         playButton.alpha = 0
         
-        [dimView, closeButton, playButton, pauseButton, progressBar]
+        [dimView, closeButton, playButton, pauseButton, backButton, forwardButton, progressBar]
             .forEach { addSubview($0) }
         
         dimView.fillSuperview()
         closeButton.placeAtTopLeftSuperviewCorner(withSize: Constants.closeButtonSize)
         playButton.centerInSuperView(withSize: Constants.controlItemSize)
         pauseButton.centerInSuperView(withSize: Constants.controlItemSize)
+        backButton.centerInSuperView(withSize: Constants.controlItemSize, offset: CGPoint(x: -80, y: 0))
+        forwardButton.centerInSuperView(withSize: Constants.controlItemSize, offset: CGPoint(x: 80, y: 0))
         progressBar.placeAtSuperviewBottom()
     }
 
@@ -112,14 +112,13 @@ final class VideoControlItemsView: UIView {
         dispatchWorkItem?.cancel()
         dispatchWorkItem = DispatchWorkItem { [weak self] in
             self?.isContentVisible = !hide
-            
-            UIView.animate(withDuration: 0.3, delay: delay, options: []) {
+            UIView.animate(withDuration: 0.3) {
                 self?.alpha = hide ? 0 : 1
             }
         }
         
         if let dispatchWorkItem = dispatchWorkItem {
-            DispatchQueue.main.async(execute: dispatchWorkItem)
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: dispatchWorkItem)
         }
     }
     
@@ -130,7 +129,7 @@ final class VideoControlItemsView: UIView {
             } completion: { _ in
                 self.delegate?.hideStatusBar(true)
             }
-            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.1) {
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.15) {
                 self.playButton.alpha = 1
             }
             
@@ -140,7 +139,7 @@ final class VideoControlItemsView: UIView {
             } completion: { _ in
                 self.delegate?.hideStatusBar(true)
             }
-            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.1) {
+            UIView.animate(withDuration: 0.3, delay: Constants.dimDelay + 0.15) {
                 self.pauseButton.alpha = 1
             }
         }
@@ -162,6 +161,16 @@ final class VideoControlItemsView: UIView {
     private func didTapOnPauseButton() {
         isPlayerPaused = true
         delegate?.didTapOnButton(.pause)
+    }
+    
+    private func didTapOnBackButton() {
+        delegate?.didTapOnButton(.back)
+        hideContent(hide: true, withDelay: Constants.longDimDelay)
+    }
+
+    private func didTapOnForwardButton() {
+        delegate?.didTapOnButton(.forward)
+        hideContent(hide: true, withDelay: Constants.longDimDelay)
     }
     
     // MARK: - public methods -

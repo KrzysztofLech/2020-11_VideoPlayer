@@ -44,15 +44,15 @@ extension UIView {
         heightAnchor.constraint(equalToConstant: size.height).isActive = true
     }
     
-    func centerInSuperView(withSize size: CGSize) {
+    func centerInSuperView(withSize size: CGSize, offset: CGPoint = .zero) {
         translatesAutoresizingMaskIntoConstraints = false
         
         if let superviewCenterXAnchor = superview?.centerXAnchor {
-            centerXAnchor.constraint(equalTo: superviewCenterXAnchor).isActive = true
+            centerXAnchor.constraint(equalTo: superviewCenterXAnchor, constant: offset.x).isActive = true
         }
         
         if let superviewCenterYAnchor = superview?.centerYAnchor {
-            centerYAnchor.constraint(equalTo: superviewCenterYAnchor).isActive = true
+            centerYAnchor.constraint(equalTo: superviewCenterYAnchor, constant: offset.y).isActive = true
         }
 
         widthAnchor.constraint(equalToConstant: size.width).isActive = true

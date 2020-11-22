@@ -41,7 +41,7 @@ class ProgressBar: UIProgressView {
         addSubview(label)
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.bottomAnchor.constraint(equalTo: topAnchor, constant: 0)
+            label.bottomAnchor.constraint(equalTo: topAnchor, constant: -2)
         ])
     }
 }

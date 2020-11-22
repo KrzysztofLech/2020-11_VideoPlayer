@@ -11,6 +11,10 @@ import AVFoundation
 
 final class VideoPlayerViewController: UIViewController {
     
+    private enum Constants {
+        static let videoMoveTimeStepInSeconds: Double = 5
+    }
+    
     private weak var delegate: RootCoordinatorDelegate?
     
     private let player: AVPlayer
@@ -105,6 +109,8 @@ final class VideoPlayerViewController: UIViewController {
         controlItemsView.manageVisibility()
     }
     
+    // MARK: - Player methods -
+    
     private func setupProgressObserver() {
         let interval = CMTimeMakeWithSeconds(1, preferredTimescale: 1)
         player.addPeriodicTimeObserver(forInterval: interval,
@@ -124,18 +130,34 @@ final class VideoPlayerViewController: UIViewController {
             self?.controlItemsView.resetState()
         }
     }
+    
+    private func moveVideo(forward: Bool) {
+        let playerCurrentTimeInSeconds = CMTimeGetSeconds(player.currentTime())
+        
+        let newTime: Double = forward
+            ? playerCurrentTimeInSeconds + Constants.videoMoveTimeStepInSeconds
+            : playerCurrentTimeInSeconds - Constants.videoMoveTimeStepInSeconds
+        
+        if newTime < 0 {
+            player.seek(to: .zero)
+            player.pause()
+            controlItemsView.resetState()
+            
+        } else if newTime < viewModel.durationInSeconds {
+            let selectedTime = CMTime(seconds: newTime, preferredTimescale: 1000)
+            player.seek(to: selectedTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
+    }
 }
 
 extension VideoPlayerViewController: VideoControlItemsViewDelegate {
     func didTapOnButton(_ type: ControlType) {
         switch type {
         case .close: delegate?.didTapOnCloseButton()
-            
-        case .play:
-            player.play()
-            
-        case .pause:
-            player.pause()
+        case .play: player.play()
+        case .pause: player.pause()
+        case .back: moveVideo(forward: false)
+        case .forward: moveVideo(forward: true)
         }
     }
     

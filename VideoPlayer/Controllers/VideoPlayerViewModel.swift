@@ -16,7 +16,7 @@ final class VideoPlayerViewModel {
         return playerItem?.duration ?? .zero
     }
     
-    private var durationInSeconds: Double {
+    var durationInSeconds: Double {
         return CMTimeGetSeconds(duration)
     }
     
