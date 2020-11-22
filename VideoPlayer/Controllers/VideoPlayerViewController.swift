@@ -82,10 +82,6 @@ final class VideoPlayerViewController: UIViewController {
         
         playerLayer.frame = view.frame
     }
-    
-    deinit {
-        print("Deinit VideoPlayerViewController")   /// WYKASOWAć !!!
-    }
 
     // MARK: - Setup methods -
     
