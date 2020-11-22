@@ -24,6 +24,12 @@ final class RootCoordinator: Coordinator {
         static let testVideoUrl = "https://bit.ly/2ZKwDrA"
     }
     
+    private enum Strings {
+        static let popupMessage = "Would you like to continue watching the video?"
+        static let noButtonTitle = "No"
+        static let yesButtonTitle = "Continue"
+    }
+    
     // MARK: - Properties -
     
     private var settingsService: SettingsServiceProtocol
@@ -55,7 +61,7 @@ final class RootCoordinator: Coordinator {
     private func showVideoPlayer() {
         let previousTime = settingsService.previousSessionVideoTime
         if previousTime > 0 {
-            presentVideoController(previousSessionVideoTime: previousTime)
+            showAlert(time: previousTime)
         } else {
             presentVideoController(previousSessionVideoTime: 0)
         }
@@ -87,6 +93,22 @@ final class RootCoordinator: Coordinator {
         settingsService.previousSessionVideoTime = 0
     }
     
+    private func showAlert(time: Double) {
+        let alertController = UIAlertController(title: nil,
+                                                message: Strings.popupMessage,
+                                                preferredStyle: .alert)
+        let noAction = UIAlertAction(title: Strings.noButtonTitle, style: .default) { [weak self] _ in
+            self?.presentVideoController(previousSessionVideoTime: 0)
+        }
+        alertController.addAction(noAction)
+        
+        let yesAction = UIAlertAction(title: Strings.yesButtonTitle, style: .default) { [weak self] _ in
+            self?.presentVideoController(previousSessionVideoTime: time)
+        }
+        alertController.addAction(yesAction)
+
+        mainViewController?.present(alertController, animated: true, completion: nil)
+    }
 }
 
 // MARK: - RootCoordinatorDelegate methods -
