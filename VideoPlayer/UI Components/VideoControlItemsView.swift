@@ -20,6 +20,7 @@ final class VideoControlItemsView: UIView {
         static let longDimDelay: Double = 1.5
         
         static let closeButtonSize = CGSize(width: 50, height: 50)
+        static let pipButtonSize = CGSize(width: 50, height: 50)
         static let controlItemSize = CGSize(width: 60, height: 60)
     }
         
@@ -44,6 +45,12 @@ final class VideoControlItemsView: UIView {
     private lazy var closeButton: UIButton = {
         return VideoControlButton(type: .close) { [weak self] in
             self?.didTapOnCloseButton()
+        }
+    }()
+    
+    private lazy var pipButton: UIButton = {
+        return VideoControlButton(type: .pip) { [weak self] in
+            self?.didTapOnPipButton()
         }
     }()
     
@@ -92,11 +99,12 @@ final class VideoControlItemsView: UIView {
         alpha = 0
         playButton.alpha = 0
         
-        [dimView, closeButton, playButton, pauseButton, backButton, forwardButton, progressBar]
+        [dimView, closeButton, pipButton, playButton, pauseButton, backButton, forwardButton, progressBar]
             .forEach { addSubview($0) }
         
         dimView.fillSuperview()
         closeButton.placeAtTopLeftSuperviewCorner(withSize: Constants.closeButtonSize)
+        pipButton.placeAtTopRightSuperviewCorner(withSize: Constants.pipButtonSize)
         playButton.centerInSuperView(withSize: Constants.controlItemSize)
         pauseButton.centerInSuperView(withSize: Constants.controlItemSize)
         backButton.centerInSuperView(withSize: Constants.controlItemSize, offset: CGPoint(x: -80, y: 0))
@@ -149,6 +157,11 @@ final class VideoControlItemsView: UIView {
         delegate?.didTapOnButton(.close)
     }
     
+    private func didTapOnPipButton() {
+        pipButton.isHidden = true
+        delegate?.didTapOnButton(.pip)
+    }
+    
     private func didTapOnPlayButton() {
         isPlayerPaused = false
         delegate?.didTapOnButton(.play)
@@ -187,5 +200,9 @@ final class VideoControlItemsView: UIView {
     
     func setPlay() {
         isPlayerPaused = false
+    }
+    
+    func setPipOff() {
+        pipButton.isHidden = false
     }
 }

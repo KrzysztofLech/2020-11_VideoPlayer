@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import AVFoundation
+import AVKit
 
 final class VideoPlayerViewController: UIViewController {
     
@@ -21,6 +21,9 @@ final class VideoPlayerViewController: UIViewController {
     private let player: AVPlayer
     private let playerLayer: AVPlayerLayer
     private let viewModel: VideoPlayerViewModel
+    
+    private var pictureInPictureController: AVPictureInPictureController?
+    private var isPipActive = false
     
     private var isStatusBarHidden: Bool = true {
         didSet {
@@ -68,6 +71,7 @@ final class VideoPlayerViewController: UIViewController {
         setupProgressObserver()
         addEndFileNotification()
         addMoveToBackgroundNotification()
+        setupPictureInPicture()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -106,6 +110,7 @@ final class VideoPlayerViewController: UIViewController {
     }
     
     @objc private func didTapOnView() {
+        guard !isPipActive else { return }
         controlItemsView.manageVisibility()
     }
     
@@ -170,12 +175,29 @@ final class VideoPlayerViewController: UIViewController {
         let time = CMTime(seconds: previousSessionVideoTime, preferredTimescale: 1000)
         player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero)
     }
+    
+    // MARK: - Picture In Picture methods -
+    
+    private func setupPictureInPicture() {
+        if AVPictureInPictureController.isPictureInPictureSupported() {
+            pictureInPictureController = AVPictureInPictureController(playerLayer: playerLayer)
+            pictureInPictureController?.delegate = self
+        } else {
+            print("Picture in picture is not supported!")
+        }
+    }
+    
+    private func startPipMode() {
+        pictureInPictureController?.startPictureInPicture()
+        isPipActive = true
+    }
 }
 
 extension VideoPlayerViewController: VideoControlItemsViewDelegate {
     func didTapOnButton(_ type: ControlType) {
         switch type {
         case .close: delegate?.didTapOnCloseButton()
+        case .pip: startPipMode()
         case .play: player.play()
         case .pause: player.pause()
         case .back: moveVideo(forward: false)
@@ -185,5 +207,21 @@ extension VideoPlayerViewController: VideoControlItemsViewDelegate {
     
     func hideStatusBar(_ hide: Bool) {
         isStatusBarHidden = hide
+    }
+}
+
+extension VideoPlayerViewController: AVPictureInPictureControllerDelegate {
+    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        controlItemsView.manageVisibility()
+    }
+    
+    func pictureInPictureControllerWillStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        controlItemsView.setPipOff()
+        isPipActive = false
+    }
+            
+    func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
+                                    restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(true)
     }
 }

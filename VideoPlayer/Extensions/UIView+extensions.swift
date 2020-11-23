@@ -44,6 +44,22 @@ extension UIView {
         heightAnchor.constraint(equalToConstant: size.height).isActive = true
     }
     
+    func placeAtTopRightSuperviewCorner(withSize size: CGSize) {
+        translatesAutoresizingMaskIntoConstraints = false
+        
+        if let superviewTopAnchor = superview?.safeAreaLayoutGuide.topAnchor {
+            topAnchor.constraint(equalTo: superviewTopAnchor).isActive = true
+        }
+        
+        if let superviewTrailingAnchor = superview?.trailingAnchor {
+            trailingAnchor.constraint(equalTo: superviewTrailingAnchor).isActive = true
+        }
+
+        widthAnchor.constraint(equalToConstant: size.width).isActive = true
+        heightAnchor.constraint(equalToConstant: size.height).isActive = true
+    }
+
+    
     func centerInSuperView(withSize size: CGSize, offset: CGPoint = .zero) {
         translatesAutoresizingMaskIntoConstraints = false
         

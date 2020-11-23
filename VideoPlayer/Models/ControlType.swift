@@ -10,6 +10,7 @@ import UIKit
 
 enum ControlType {
     case close
+    case pip
     case play
     case pause
     case back
@@ -18,6 +19,7 @@ enum ControlType {
     var icon: UIImage? {
         switch self {
         case .close: return UIImage(named: "close_icon")
+        case .pip: return UIImage(named: "pip_icon")
         case .play: return UIImage(named: "play_icon")
         case .pause: return UIImage(named: "pause_icon")
         case .back: return UIImage(named: "replay_icon")
